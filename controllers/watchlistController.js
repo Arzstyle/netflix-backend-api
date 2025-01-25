@@ -1,5 +1,6 @@
 const Watchlist = require("../models/Watchlist");
 const db = require("../db/connection");
+const { updateGenre } = require("./genresController");
 
 const watchlistController = {
   getAllByUserId: (req, res) => {
@@ -9,13 +10,7 @@ const watchlistController = {
       res.json(results); 
     });
   },
-
-  getAllWatchlist: (req, res) => {
-    Watchlist.getAllWatchlist((err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results); 
-    });
-  },
+  
 
   addMovieToWatchlist:  (req, res) => {
     const { userId, movieId } = req.body;
@@ -62,7 +57,15 @@ const watchlistController = {
     });
   });
 },
-  
+
+  updateWatchlist : (req, res) => {
+    const userId = req.params.userId; 
+    const movieId = req.params.movieId; 
+    Watchlist.updateWatchlist(userId, movieId, (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(results); 
+    });
+  },
 
   removeMovieFromWatchlist: (req, res) => {
     const userId = req.params.userId; // Ambil userId dari parameter
