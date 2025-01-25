@@ -339,7 +339,6 @@ Folder `User` digunakan untuk mengelola pengguna, termasuk registrasi, login, da
 ---
 
 #### **1. POST /users/register**
-
 **Deskripsi:**  
 Endpoint ini digunakan untuk mendaftarkan pengguna baru. Data yang diperlukan adalah:
 - **`username`**: Nama pengguna.
@@ -412,7 +411,7 @@ Jika berhasil, token JWT akan dikembalikan. Jika gagal, pesan error akan ditampi
 Endpoint ini digunakan untuk mendapatkan daftar pengguna menggunakan email.
 
 **Contoh Request:**
-```json
+```
 http://localhost:3000/users/getUserbyEmail/abay@example.com
 ```
 
@@ -440,7 +439,7 @@ Endpoint ini digunakan untuk mendapatkan daftar semua pengguna yang terdaftar di
 
 **Contoh Request:**
 
-```json
+```
 http://localhost:3000/users/getAllUser
 ```
 
@@ -476,7 +475,7 @@ Endpoint ini digunakan untuk mendapatkan informasi pengguna berdasarkan ID.
 
 **Contoh Request:**
 
-```json
+```
 http://localhost:3000/users/getUserById/1
 ```
 
