@@ -126,7 +126,7 @@ Jika film terkait dihapus, semua daftar tontonan yang mencantumkan film tersebut
 
 ---
 
-### **Struktur**
+### **Struktur Folder**
 
 ```
 root/
@@ -150,8 +150,6 @@ root/
 │   └── connection.js
 │
 ├── models/
-│   ├── Movie.js
-│   ├── User.js
 │   └── Watchlist.js
 │
 ├── .env
@@ -288,30 +286,6 @@ Folder ini bertanggung jawab mengelola koneksi ke database.
 #### **5. `models`**
 Folder ini berisi model data untuk berinteraksi dengan tabel dalam database.
 
-  - **`User.js`**  
-    Fungsi Utama: Menyediakan fungsi-fungsi untuk mengelola data pengguna dalam database.
-      - **`create(name, email, hashedPassword, callback)`**:
-        Menambahkan pengguna baru ke database dengan data name, email, dan password yang telah di-hash.
-      - **`findByEmail(email, callback)`**:
-        Mencari pengguna berdasarkan email. Digunakan untuk keperluan login atau validasi keberadaan email.
-      - **`getAll(callback)`**:
-        Mengambil semua data pengguna dari tabel Users.
-      - **`getById(id, callback)`**:
-        Mengambil data pengguna tertentu berdasarkan id.
-
-  - **`Movie.js`**
-    Fungsi Utama: Mengelola data film, termasuk operasi CRUD (Create, Read, Update, Delete).
-      - **`getAll(callback)`**:
-        Mengambil semua data film dari tabel movies.
-      - **`getById(id, callback)`**:
-        Mengambil data film berdasarkan id.
-      - **`create(title, description, genreId, releaseYear, callback)`**:
-        Menambahkan film baru ke tabel movies dengan data seperti judul, deskripsi, ID genre, dan tahun rilis.
-      - **`update(id, title, description, genreId, releaseYear, callback)`**:
-        Memperbarui data film tertentu berdasarkan id. Jika description atau releaseYear kosong, maka akan diisi NULL.
-      - **`delete(id, callback)`**:
-        Menghapus data film dari tabel movies berdasarkan id.
-
   - **`Watchlist.js`**
     Fungsi Utama: Mengelola data watchlist pengguna, termasuk menambahkan, membaca, dan menghapus item di watchlist.
       - **`getAllByUserId(userId, callback)`**:
@@ -356,15 +330,667 @@ Berisi metadata proyek, daftar dependensi, dan skrip untuk menjalankan aplikasi,
 ---
 
 
+### **Penjelasan Endpoint API**
+
+#### **a. User**
+
+Folder `User` digunakan untuk mengelola pengguna, termasuk registrasi, login, dan operasi pengguna seperti mendapatkan daftar pengguna dan informasi pengguna tertentu.
+
+---
+
+#### **1. POST /users/register**
+
+**Deskripsi:**  
+Endpoint ini digunakan untuk mendaftarkan pengguna baru. Data yang diperlukan adalah:
+- **`username`**: Nama pengguna.
+- **`email`**: Alamat email pengguna.
+- **`password`**: Kata sandi.
+
+**Contoh Request:**
+
+```json
+POST /register
+{
+  "name": "Jane Doe",
+  "email": "janedoe@example.com",
+  "password": "securepassword123"
+}
+```
+
+**Respons:**  
+Jika berhasil, pengguna akan menerima email verifikasi. Jika gagal, akan mengembalikan pesan error.
+
+**Contoh Respons:**
+
+```json
+{
+  "message": "User registered successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/e5e608ad-4125-480e-acf3-f1a5faff366b)
 
 
-  
-  
+---
 
-   
+
+#### **2. POST /users/login**
+**Deskripsi:**
+Endpoint ini digunakan untuk autentikasi pengguna dengan email dan password yang valid.
+- **`email`**: Alamat email pengguna.
+- **`password`**: Kata sandi.
+
+**Contoh Request:**
+
+```json
+POST /login
+{
+  "email": "janedoe@example.com",
+  "password": "securepassword123"
+}
+```
+
+**Contoh Respons:**  
+Jika berhasil, token JWT akan dikembalikan. Jika gagal, pesan error akan ditampilkan.
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/62cdf300-3ea9-47d3-b29b-0f439c0f52b8)
+
+
+---
+
+#### **3. GET /users/findByEmail**
+*Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan daftar pengguna menggunakan email.
+
+**Contoh Request:**
+```json
+http://localhost:3000/users/getUserbyEmail/abay@example.com
+```
+
+**Contoh Respons:**  
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "$2b$10$hashedpassword",
+  "created_at": "2023-12-01T10:00:00.000Z"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/098f9b8a-3d9a-4aea-bc89-11d31a1bc08a)
+
+---
+
+
+#### **4. GET /users/getAllUser**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan daftar semua pengguna yang terdaftar di database.
+
+**Contoh Request:**
+
+```json
+http://localhost:3000/users/getAllUser
+```
+
+**Contoh Respons:**  
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Jane Doe",
+    "email": "janedoe@example.com"
+  },
+  {
+    "id": 2,
+    "name": "John Smith",
+    "email": "johnsmith@example.com"
+  }
+]
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/9165d62d-3662-421f-976e-d07dcd444730)
+
+
+---
+
+
+#### **5. GET /users/getUserById**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan informasi pengguna berdasarkan ID.
+
+**Contoh Request:**
+
+```json
+http://localhost:3000/users/getUserById/1
+```
+
+**Contoh Respons:**
+Jika berhasil, data pengguna akan dikembalikan. Jika gagal, pesan error akan ditampilkan.
+
+```json
+{
+  "id": 1,
+  "name": "Jane Doe",
+  "email": "janedoe@example.com"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/cac2e3fe-6f51-4d4f-9cae-b008014a03ac)
+
+
+---
+
+
+#### **6. PUT /users/updateUser**
+**Deskripsi:**
+Endpoint ini digunakan untuk memperbarui informasi pengguna berdasarkan ID.
+
+**Contoh Request:**
+
+```json
+PUT /updateUser/1
+{
+  "name": "Updated Name",
+  "email": "updatedemail@example.com"
+}
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```
+{
+  "message": "User updated successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/01531683-9a8e-47a7-819e-a8211a5b010f)
+
+
+---
+
+
+#### **7. PUT /users/deleteUser**
+**Deskripsi:**
+Endpoint ini digunakan untuk menghapus pengguna berdasarkan ID.
+
+**Contoh Request:**
+```
+http://localhost:3000/users/deleteUser/5
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```
+{
+  "message": "User deleted successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/f9938ceb-8b10-419f-b825-abadf3c847d4)
+
+**Screenshot**
+*Tampilkan hasil pengujian setelah delete User:*
+![image](https://github.com/user-attachments/assets/a8f7109b-3e32-4fca-99cd-f73229b4eecc)
+
+
+---
+
+
+#### **b. movies**
+
+Folder `Movies` digunakan untuk mengelola data film, termasuk mendapatkan semua film, mendapatkan film berdasarkan ID, membuat film baru, memperbarui film, dan menghapus film.
+
+---
+
+#### **8. POST /movies/create**
+**Deskripsi:**
+Endpoint ini digunakan untuk membuat film baru.
+
+**Contoh Request:**
+
+```json
+POST /movies/create
+{
+  "title": "Avatar",
+  "description": "A sci-fi epic",
+  "genre_id": 3,
+  "release_year": 2009
+}
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```
+{
+  "message": "Movie created successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/5bd8f394-d53e-4beb-9cea-82494d778ad4)
+
+
+---
+
   
- 
-   
+#### **9. GET /movies/getAll**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan semua data film.
+
+**Contoh Request:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```
+http://localhost:3000/movie/getAll/
+```
+
+**Contoh Respons:**
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Inception",
+    "description": "A mind-bending thriller",
+    "genre_id": 2,
+    "release_year": 2010
+  },
+  {
+    "id": 2,
+    "title": "Titanic",
+    "description": "A romantic drama",
+    "genre_id": 1,
+    "release_year": 1997
+  }
+]
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/dfa9516b-b917-4a16-9015-6513b2e5bbba)
+
+
+---
+
+
+#### **10. GET /movies/getMovieById/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan data film berdasarkan ID.
+
+**Contoh Request:**
+```
+http://localhost:3000/movie/getMovieById/1
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```json
+{
+  "id": 1,
+  "title": "Inception",
+  "description": "A mind-bending thriller",
+  "genre_id": 2,
+  "release_year": 2010
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/85d852f0-3542-40b1-bc58-546c1442d044)
+
+
+---
+
+
+#### **11. PUT /movies/update/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk memperbarui data film berdasarkan ID.
+
+**Contoh Request:**
+```
+PUT /movies/update/1
+{
+  "title": "Inception Updated",
+  "description": "An updated mind-bending thriller",
+  "genre_id": 2,
+  "release_year": 2011
+}
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+```
+{
+  "message": "Movie updated successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/4a998c1c-6399-41cd-809b-8ccaccddef08)
+
+**Screenshot:**  
+*Tampilkan hasil pengujian setalah update*
+![image](https://github.com/user-attachments/assets/4d166240-9fff-4243-a9df-637d338e7ba2)
+
+
+---
+
+#### **12. DELETE /movies/delete/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk menghapus data film berdasarkan ID.
+
+**Contoh Request:**
+```
+http://localhost:3000/movie/delete/23
+```
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+
+```
+{
+  "message": "Movie deleted successfully!"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/dfc899e9-9373-44d2-bed6-e672e38c433a)
+
+**Screenshot:**  
+*Tampilkan hasil pengujian setelah di delete dan di cek menggunakan id:*
+![image](https://github.com/user-attachments/assets/5d80aa9f-e0b0-4c83-8d31-f5fc0ccebe54)
+
+
+---
+
+
+#### **c.  Genres**
+
+Folder `Genres` digunakan untuk mengelola data genre film, termasuk mendapatkan semua genre, mendapatkan genre berdasarkan ID, membuat genre baru, memperbarui genre, dan menghapus genre.
+
+---
+
+#### **13. POST /genres/createGenre**
+**Deskripsi:**
+Endpoint ini digunakan untuk membuat genre baru.
+
+**Contoh Request:**
+
+```json
+POST /genres/createGenre
+{
+  "name": "Comedy"
+}
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+```
+{
+  "message": "Genre created",
+  "id": 3
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/4892e1b3-bfb6-4e3a-af87-c8d3620159bd)
+
+
+---
+
+
+#### **14. GET /genres/getAllGenres**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan semua data genre.
+
+**Contoh Request:**
+```
+http://localhost:3000/genres/getAllGenres
+```
+
+**Contoh Respons:**
+Jika berhasil, daftar pengguna akan ditampilkan dalam bentuk array. Jika gagal, pesan error akan dikembalikan.
+```json
+[
+  {
+    "id": 1,
+    "name": "Action"
+  },
+  {
+    "id": 2,
+    "name": "Drama"
+  }
+]
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/3853d687-4ec9-4894-b871-517e4be36055)
+
+
+---
+
+
+#### **15. GET /genres/getById/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan data genre berdasarkan ID.
+
+**Contoh Request:**
+```
+http://localhost:3000/genres/getById/8
+```
+
+**Contoh Respons:**
+```json
+{
+  "id": 1,
+  "name": "Action"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/eac0795e-eeee-4848-8ce6-8cac58736b46)
+
+
+---
+
+
+#### **16. PUT /genres/updateGenre/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk memperbarui data genre berdasarkan ID.
+
+**Contoh Request:**
+```json
+PUT /genres/updateGenre/2
+{
+  "name": "Thriller"
+}
+```
+
+**Contoh Respons:**
+```json
+{
+  "message": "Genre updated"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/e58b02d4-51a4-463e-a20f-263c5d2ce0b1)
+
+
+---
+
+
+#### **17. DELETE /genres/updateGenre/:id**
+**Deskripsi:**
+Endpoint ini digunakan untuk menghapus data genre berdasarkan ID.
+
+**Contoh Request:**
+```
+http://localhost:3000/genres/deleteGenre/8
+```
+
+**Contoh Respons:**
+```json
+{
+  "message": "Genre deleted"
+}
+```
+
+**Screenshot:**  
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/b1171642-dd1a-44cb-bce7-5a1b1f0c5138)
+
+**Screenshot:**  
+*Tampilkan hasil pengujian setelah melakukan delete:*
+![image](https://github.com/user-attachments/assets/e3f68826-ee5d-484c-9948-ef77c409f22d)
+
+
+---
+
+
+#### **c.  Watchlist**
+Folder `Watchlist` digunakan untuk mengelola data watchlist pengguna, termasuk mendapatkan semua watchlist, menambah film ke dalam watchlist, dan menghapus film dari watchlist. Semua endpoint dilindungi oleh middleware authMiddleware untuk memastikan hanya pengguna terautentikasi yang dapat mengaksesnya.
+
+---
+
+
+#### ** 18. POST /watchlist/addWatchlist**
+**Deskripsi:**
+Endpoint ini digunakan untuk menambahkan film baru ke dalam watchlist pengguna.
+
+**Autentikasi:**
+Middleware authMiddleware diperlukan.
+
+**Contoh Request:**
+```json
+POST /watchlist/addWatchlist
+{
+  "userId": 1,
+  "movieId": 104,
+}
+```
+
+**Contoh Respons:**
+```json
+{
+  "message": "Movie added to watchlist",
+  "watchlistId": 3
+}
+```
+
+**Screenshot:**  
+*Tambahan, untuk menambahkan movie ke daftar watchlist users, harus menggunakan token karena untuk verifikasi sesuai token JWT users seperti pada contoh postman tersebut.*
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/edd0a442-7d16-4262-8268-0ede4549e403)
+
+
+---
+
+
+#### ** 19. GET /watchlist/getAllByUserId/:userId**
+**Deskripsi:**
+Endpoint ini digunakan untuk mendapatkan semua watchlist milik pengguna tertentu berdasarkan userId.
+
+**Autentikasi:**
+Middleware authMiddleware diperlukan.
+
+**Contoh Request:**
+```
+http://localhost:3000/watchlist/getAllByUserId/1
+```
+
+**Contoh Respons:**
+
+```json
+
+{
+  "id": 6,
+  "movie_id": 20,
+  "title": "Avatar 2 ",
+  "added_at": "2025-01-25T03:57:01.000Z"
+}
+```
+
+**Screenshot:**  
+*Tambahan, untuk mengecek daftar watchlist users, harus menggunakan token karena untuk verifikasi sesuai token JWT users seperti pada contoh postman tersebut.*
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/c8caa485-95ac-4c15-846a-2e0a75f97243)
+
+
+---
+
+
+#### ** 20. DELETE /watchlist/removeMovie/:userId/:movieId**
+**Deskripsi:**
+Endpoint ini digunakan untuk menghapus film dari watchlist pengguna berdasarkan userId dan movieId.
+
+**Autentikasi:**
+Middleware authMiddleware diperlukan.
+
+**Contoh Request:**
+```
+http://localhost:3000/watchlist/removeMovie/1/20
+```
+
+**Contoh Respons:**
+```
+{
+  "message": "Movie removed from watchlist"
+}
+```
+
+**Screenshot:**  
+*Tambahan, untuk menghapus daftar watchlist users, harus menggunakan token karena untuk verifikasi sesuai token JWT users seperti pada contoh postman tersebut.*
+*Tampilkan hasil pengujian endpoint ini di Postman menggunakan gambar, misalnya:*
+![image](https://github.com/user-attachments/assets/9a9ef4bf-3890-49f3-87b2-e4a99236810d)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
