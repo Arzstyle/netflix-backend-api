@@ -234,8 +234,12 @@ Folder ini berisi definisi endpoint API dan menghubungkan endpoint ke controller
         Login pengguna dengan memverifikasi kredensial.
       - **`GET /getAllUser`**:
         Mengambil daftar semua pengguna.
+      - **`GET /findByEmai`*8:
+        Mengambil data pengguna berdasarkan email.
       - **`GET /getUserById/:id`**:
         Mengambil data pengguna berdasarkan id.
+      - **`DELETE /deleteUser/:id`**:
+        Menghapus data user dengan menggunakan id.
         
   - **`movieRoutes.js`**
     Mendefinisikan rute untuk data genre, seperti:
