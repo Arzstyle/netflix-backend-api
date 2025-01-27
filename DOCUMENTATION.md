@@ -23,12 +23,12 @@ Aplikasi ini dirancang bagi pengembang atau tim pengembang yang ingin membangun 
 4. **Pengelolaan Database yang Efisien**: Database dirancang dengan relasi antar tabel untuk memastikan integritas dan keterhubungan data, seperti antara film dan genre, atau watchlist pengguna.
 
 ### **Fitur Utama**
-| 1.|  Manajemen Film : Pengguna dapat mengakses daftar film atau serial yang tersedia, menambahkan, atau menghapusnya sesuai kebutuhan.
-| 2.|  Watchlist : Menyediakan fungsi untuk menambahkan atau menghapus film dari daftar tontonan pengguna.
-| 3.|  Manajemen Genre : Endpoint untuk membuat, membaca, memperbarui, dan menghapus genre yang terhubung dengan film.
-| 4.|  Sistem Pengguna : Registrasi, login, pengelolaan profil, serta verifikasi akun pengguna.
-| 5.|  Keamanan : Sistem otentikasi berbasis token untuk memastikan keamanan akses API.
-| 6.|  Error Handling yang Andal : Memberikan pesan kesalahan yang jelas kepada pengembang untuk mempermudah debugging.
+1. Manajemen Film : Pengguna dapat mengakses daftar film atau serial yang tersedia, menambahkan, atau menghapusnya sesuai kebutuhan.
+2. Watchlist : Menyediakan fungsi untuk menambahkan atau menghapus film dari daftar tontonan pengguna.
+3. Manajemen Genre : Endpoint untuk membuat, membaca, memperbarui, dan menghapus genre yang terhubung dengan film.
+4. Sistem Pengguna : Registrasi, login, pengelolaan profil, serta verifikasi akun pengguna.
+5. Keamanan : Sistem otentikasi berbasis token untuk memastikan keamanan akses API.
+6. Error Handling yang Andal : Memberikan pesan kesalahan yang jelas kepada pengembang untuk mempermudah debugging.
 
 ### **Teknologi yang Digunakan**
 Node.js & Express: Untuk pengembangan server backend yang cepat, ringan, dan efisien.
