@@ -2,6 +2,15 @@
 
 ---
 
+## **Anggota Kelompok**  
+**Kelompok 5 - Project Netflix Backend API**  
+| **Nama Anggota**                 | **NIM**       |  
+|----------------------------------|---------------|  
+| M Akbar Rizky Saputra            | 20230040236   |  
+| Siti Rahma Alia                  | 20230040023   |  
+| Desti                            | 20230040020   |  
+
+
 ### **Deskripsi Proyek**
 Netflix Backend API adalah sebuah proyek backend yang dirancang untuk mendukung platform streaming film dan serial televisi. Proyek ini memungkinkan pengelolaan data film, serial, genre, pengguna, serta menyediakan fitur autentikasi, otorisasi, dan pengelolaan akun pengguna. Backend ini dibangun menggunakan teknologi modern untuk memastikan performa, skalabilitas, dan keamanan yang optimal.
 
@@ -14,12 +23,12 @@ Aplikasi ini dirancang bagi pengembang atau tim pengembang yang ingin membangun 
 4. **Pengelolaan Database yang Efisien**: Database dirancang dengan relasi antar tabel untuk memastikan integritas dan keterhubungan data, seperti antara film dan genre, atau watchlist pengguna.
 
 ### **Fitur Utama**
-1. Manajemen Film: Pengguna dapat mengakses daftar film atau serial yang tersedia, menambahkan, atau menghapusnya sesuai kebutuhan.
-2. Watchlist: Menyediakan fungsi untuk menambahkan atau menghapus film dari daftar tontonan pengguna.
-3. Manajemen Genre: Endpoint untuk membuat, membaca, memperbarui, dan menghapus genre yang terhubung dengan film.
-4. Sistem Pengguna: Registrasi, login, pengelolaan profil, serta verifikasi akun pengguna.
-5. Keamanan: Sistem otentikasi berbasis token untuk memastikan keamanan akses API.
-6. Error Handling yang Andal: Memberikan pesan kesalahan yang jelas kepada pengembang untuk mempermudah debugging.
+| 1.|  Manajemen Film : Pengguna dapat mengakses daftar film atau serial yang tersedia, menambahkan, atau menghapusnya sesuai kebutuhan.
+| 2.|  Watchlist : Menyediakan fungsi untuk menambahkan atau menghapus film dari daftar tontonan pengguna.
+| 3.|  Manajemen Genre : Endpoint untuk membuat, membaca, memperbarui, dan menghapus genre yang terhubung dengan film.
+| 4.|  Sistem Pengguna : Registrasi, login, pengelolaan profil, serta verifikasi akun pengguna.
+| 5.|  Keamanan : Sistem otentikasi berbasis token untuk memastikan keamanan akses API.
+| 6.|  Error Handling yang Andal : Memberikan pesan kesalahan yang jelas kepada pengembang untuk mempermudah debugging.
 
 ### **Teknologi yang Digunakan**
 Node.js & Express: Untuk pengembangan server backend yang cepat, ringan, dan efisien.
@@ -979,20 +988,553 @@ http://localhost:3000/watchlist/removeMovie/1/20
 **[⬆ kembali ke atas](#Netflix-Backend-API-Documentation)**
 
 
+---
 
 
+## Dokumentasi User Controller
+
+Dokumentasi ini mencakup empat file controller: `userController.js`, `movieController.js`, `genresController.js`, dan `watchlistController.js`. Setiap file menangani berbagai operasi terkait entitas yang berbeda seperti pengguna, film, genre, dan watchlist. 
+
+## Import Statements
+- **`bcrypt`**: Digunakan untuk mengenkripsi password secara aman.
+- **`jsonwebtoken`**: Digunakan untuk menghasilkan JSON Web Token (JWT) untuk keperluan autentikasi.
+- **`Koneksi Database (db)`**: Memberikan akses ke database untuk menjalankan query.
+
+```javascript
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const db = require("../db/connection");
+```
+
+** Metode dalam Controller ** 
+1. `register`
+Mengelola pendaftaran pengguna dengan menyimpan data pengguna baru ke dalam database.
+`Input`: name, email, password dari req.body.
+
+`Proses`:  - Password dienkripsi menggunakan bcrypt.
+           - Data pengguna baru dimasukkan ke tabel Users.
+   
+`Respons`: - Berhasil: Status 201 dengan pesan sukses.
+           - Gagal: Status 500 dengan pesan error.
+
+```javascript
+register: async (req, res) => {
+  const { name, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const sql = "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)";
+  db.query(sql, [name, email, hashedPassword], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ message: "User registered successfully!" });
+  });
+};
+```
 
 
+2. `login`
+Mengelola proses login pengguna dengan validasi email dan password.
+
+`Input`: email, password dari req.body.
+
+`Proses`: - Mencari pengguna berdasarkan email di tabel Users. 
+          - Memverifikasi kecocokan password menggunakan bcrypt.
+          - Jika valid, menghasilkan token JWT untuk autentikasi.
+          
+`Respons`: - Berhasil: JSON berisi token.
+           - Gagal: Status 401 untuk kredensial tidak valid, atau 404 jika pengguna tidak ditemukan.
+         
+
+``` javascript
+login: (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = "SELECT * FROM Users WHERE email = ?";
+  db.query(sql, [email], async (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0) return res.status(404).json({ error: "User not found" });
+
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token });
+  });
+};
+```
 
 
+3. `etAllUsers`
+Mengambil semua data pengguna dari tabel Users.
+
+`Proses`: Menjalankan query untuk mendapatkan semua pengguna.
+`Respons`: Berhasil: Status 200 dengan daftar data pengguna.
+         Gagal: Status 500 dengan pesan error.
+
+```javascript
+getAllUsers: (req, res) => {
+  const sql = "SELECT * FROM Users";
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json(results);
+  });
+};
+```
 
 
+4. findByEmail
+Mencari data pengguna berdasarkan email.
+
+`Input`: email dari req.params.
+
+`Proses`: - Menjalankan query untuk mencari pengguna dengan email tertentu.
+ 
+`Respons`: - Berhasil: Status 200 dengan data pengguna.
+         - Gagal: Status 404 jika pengguna tidak ditemukan, atau 500 jika terjadi error.
+
+```javascript
+findByEmail: (req, res) => {
+  const { email } = req.params;
+  const sql = "SELECT * FROM Users WHERE email = ?";
+  db.query(sql, [email], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(results[0]);
+  });
+};
+```
 
 
+5. `getUserById`
+Mengambil data pengguna berdasarkan ID.
+
+`Input`: id dari req.params.
+
+`Proses`: - Menjalankan query untuk mendapatkan pengguna berdasarkan ID.
+
+`Respons` Berhasil: - Status 200 dengan data pengguna.
+                    - Gagal: Status 404 jika pengguna tidak ditemukan, atau 500 jika terjadi error.
+
+```javascript
+getUserById: (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM Users WHERE id = ?";
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(results[0]);
+  });
+};
+```
 
 
+`6. updateUser`
+Mengupdate data pengguna berdasarkan ID.
+
+`Input`: id dari req.params, name dan email dari req.body.
+
+`Proses`: - Menjalankan query untuk mengupdate data pengguna.
+
+`Respons`: - Berhasil: Status 200 dengan pesan sukses.
+         - Gagal: Status 500 dengan pesan error.
+
+```javascript
+updateUser: (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+  const sql = "UPDATE Users SET name = ?, email = ? WHERE id = ?";
+  db.query(sql, [name, email, id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json({ message: "User updated successfully!" });
+  });
+};
+```
 
 
+7. `deleteUser`
+Menghapus pengguna berdasarkan ID.
+
+`Input`: id dari req.params.
+
+`Proses`: - Menjalankan query untuk menghapus pengguna.
+
+`Respons`: - Berhasil: Status 200 dengan pesan sukses.
+           - Gagal: Status 500 dengan pesan error.
+
+```javascript
+deleteUser: (req, res) => {
+  const { id } = req.params;
+  const sql = "DELETE FROM Users WHERE id = ?";
+  db.query(sql, [id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json({ message: "User deleted successfully!" });
+  });
+};
+```
+
+---
+
+## movieController.js
+
+### Import Statements
+- **`db`**: Koneksi ke database.
+
+```javascript
+const db = require("../db/connection");
+```
+
+### Metode
+
+#### 1. `getAllMovies`
+Mengambil semua film dari database.
+
+- **Output**: Array data film.
+- **Query**: `SELECT * FROM Movies`.
+
+```javascript
+getAllMovies: (req, res) => {
+  const sql = "SELECT * FROM Movies";
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+},
+```
+
+**Penjelasan:**
+Fungsi ini menjalankan query SQL SELECT * FROM Movies untuk mengambil semua data film dari tabel Movies.
+Jika terjadi error, fungsi akan mengembalikan status 500 dengan pesan error.
+
+
+#### 2. `getMovieById`
+Mengambil data film berdasarkan ID.
+
+- **Input**: `id` (params).
+- **Output**: Data film atau pesan error jika tidak ditemukan.
+- **Query**: `SELECT * FROM Movies WHERE id = ?`.
+
+```javascript
+getMovieById: (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM Movies WHERE id = ?";
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0) return res.status(404).json({ message: "Movie not found" });
+    res.json(results[0]);
+  });
+},
+```
+
+**Penjelasan:**
+Fungsi ini mengambil data film berdasarkan ID yang diterima dari parameter.
+Mengembalikan status 404 jika film tidak ditemukan.
+
+
+#### 3. `createMovie`
+Menambahkan film baru ke database.
+
+- **Input**: `title`, `description`, `genre_id`, `release_year`.
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `INSERT INTO Movies`.
+
+```javascript
+createMovie: (req, res) => {
+  const { title, description, genre_id, release_year } = req.body;
+  const sql = "INSERT INTO Movies (title, description, genre_id, release_year) VALUES (?, ?, ?, ?)";
+  db.query(sql, [title, description, genre_id, release_year], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ message: "Movie created successfully!" });
+  });
+},
+```
+
+**Penjelasan:**
+Data film diterima dari req.body kemudian disimpan ke dalam tabel Movies.
+
+
+#### 4. `updateMovie`
+Memperbarui data film berdasarkan ID.
+
+- **Input**: `id` (params), `title`, `description`, `genre_id`, `release_year`.
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `UPDATE Movies`.
+
+```javascript
+updateMovie: (req, res) => {
+  const { id } = req.params;
+  const { title, description, genre_id, release_year } = req.body;
+  const sql = "UPDATE Movies SET title = ?, description = ?, genre_id = ?, release_year = ? WHERE id = ?";
+  db.query(sql, [title, description, genre_id, release_year, id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Movie updated successfully!" });
+  });
+},
+```
+
+**Penjelasan:**
+Fungsi ini memperbarui data film berdasarkan ID yang diterima dari parameter.
+
+
+#### 5. `deleteMovie`
+Menghapus film berdasarkan ID.
+
+- **Input**: `id` (params).
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `DELETE FROM Movies`.
+
+```javascript
+deleteMovie: (req, res) => {
+  const { id } = req.params;
+  const sql = "DELETE FROM Movies WHERE id = ?";
+  db.query(sql, [id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Movie deleted successfully!" });
+  });
+},
+```
+
+**Penjelasan:**
+Fungsi ini menjalankan query DELETE FROM Movies untuk menghapus film berdasarkan ID.
+
+---
+
+
+## genresController.js
+
+### Import Statements
+- **`db`**: Koneksi ke database.
+
+```javascript
+const db = require("../db/connection");
+```
+
+### Metode
+
+#### 1. `getAllGenres`
+Mengambil semua genre dari database.
+
+- **Output**: Array data genre.
+- **Query**: `SELECT * FROM Genres`.
+
+```javascript
+getAllGenres: (req, res) => {
+  const sql = "SELECT * FROM Genres";
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json(results);
+  });
+},
+```
+
+
+#### 2. `getGenreById`
+Mengambil data genre berdasarkan ID.
+
+- **Input**: `id` (params).
+- **Output**: Data genre atau pesan error jika tidak ditemukan.
+- **Query**: `SELECT * FROM Genres WHERE id = ?`.
+
+```javascript
+getGenreById: (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM Genres WHERE id = ?";
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0) return res.status(404).json({ message: "Genre not found" });
+    res.status(200).json(results[0]);
+  });
+},
+```
+
+#### 3. `createGenre`
+Menambahkan genre baru ke database.
+
+- **Input**: `name`.
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `INSERT INTO Genres`.
+
+```javascript
+createGenre: (req, res) => {
+  const { name } = req.body;
+  const sql = "INSERT INTO Genres (name) VALUES (?)";
+  db.query(sql, [name], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ message: "Genre created", id: result.insertId });
+  });
+},
+```
+
+
+#### 4. `updateGenre`
+Memperbarui data genre berdasarkan ID.
+
+- **Input**: `id` (params), `name`.
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `UPDATE Genres`.
+
+```javascript
+updateGenre: (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const sql = "UPDATE Genres SET name = ? WHERE id = ?";
+  db.query(sql, [name, id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ message: "Genre not found" });
+    res.status(200).json({ message: "Genre updated" });
+  });
+},
+```
+
+
+#### 5. `deleteGenre`
+Menghapus genre berdasarkan ID.
+
+- **Input**: `id` (params).
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `DELETE FROM Genres`.
+
+```javascript
+deleteGenre: (req, res) => {
+  const { id } = req.params;
+  const sql = "DELETE FROM Genres WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ message: "Genre not found" });
+    res.status(200).json({ message: "Genre deleted" });
+  });
+},
+```
+
+---
+
+
+## watchlistController.js
+
+### Import Statements
+- **`Watchlist`**: Model untuk operasi watchlist.
+- **`db`**: Koneksi ke database.
+
+```javascript
+const Watchlist = require("../models/Watchlist");
+const db = require("../db/connection");
+```
+
+### Metode
+
+#### 1. `getAllByUserId`
+Mengambil semua film di watchlist untuk pengguna tertentu.
+
+- **Input**: `userId` (params).
+- **Output**: Array data film dalam watchlist.
+
+```javascript
+getAllByUserId: (req, res) => {
+  const userId = req.params.userId;
+  Watchlist.getAllByUserId(userId, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+},
+```
+
+**Penjelasan:**
+Mengambil semua data watchlist berdasarkan userId yang diterima dari parameter.
+Jika terjadi error, mengembalikan status 500 dengan pesan error.
+
+
+#### 2. `addMovieToWatchlist`
+Menambahkan film ke watchlist pengguna.
+
+- **Input**: `userId`, `movieId`.
+- **Output**: Pesan keberhasilan atau error.
+- **Validasi**: Memastikan user dan film ada, serta film belum ada di watchlist.
+- **Query**:
+  - Periksa user: `SELECT id FROM users WHERE id = ?`.
+  - Periksa film: `SELECT id FROM movies WHERE id = ?`.
+  - Periksa watchlist: `SELECT id FROM watchlist WHERE user_id = ? AND movie_id = ?`.
+  - Tambahkan: `INSERT INTO watchlist`.
+ 
+```javascript
+addMovieToWatchlist: (req, res) => {
+  const { userId, movieId } = req.body;
+
+  if (!userId || !movieId) {
+    return res.status(400).json({ error: "User ID and Movie ID are required" });
+  }
+
+  const checkUserQuery = "SELECT id FROM users WHERE id = ?";
+  db.query(checkUserQuery, [userId], (err, userResults) => {
+    if (err) return res.status(500).json({ error: "Database error when checking user" });
+    if (userResults.length === 0) return res.status(404).json({ error: "User not found" });
+
+    const checkMovieQuery = "SELECT id FROM movies WHERE id = ?";
+    db.query(checkMovieQuery, [movieId], (err, movieResults) => {
+      if (err) return res.status(500).json({ error: "Database error when checking movie" });
+      if (movieResults.length === 0) return res.status(404).json({ error: "Movie not found" });
+
+      const checkWatchlistQuery = "SELECT id FROM watchlist WHERE user_id = ? AND movie_id = ?";
+      db.query(checkWatchlistQuery, [userId, movieId], (err, watchlistResults) => {
+        if (err) return res.status(500).json({ error: "Database error when checking watchlist" });
+        if (watchlistResults.length > 0) return res.status(409).json({ error: "Movie already exists in watchlist" });
+
+        const insertWatchlistQuery = "INSERT INTO watchlist (user_id, movie_id, added_at) VALUES (?, ?, CURRENT_TIMESTAMP)";
+        db.query(insertWatchlistQuery, [userId, movieId], (err) => {
+          if (err) return res.status(500).json({ error: "Database error when adding to watchlist" });
+          res.status(201).json({ message: "Movie added to watchlist successfully!" });
+        });
+      });
+    });
+  });
+},
+```
+
+**Penjelasan:**
+- Fungsi ini memvalidasi bahwa userId dan movieId disediakan dalam body request.
+- Melakukan pengecekan apakah userId dan movieId valid dan eksis di database.
+- Menambahkan film ke watchlist jika belum ada di dalamnya.
+
+#### 3. `updateWatchlist`
+Memperbarui data dalam watchlist pengguna.
+
+- **Input**: `userId`, `movieId`.
+- **Output**: Pesan keberhasilan atau error.
+
+```javascript
+updateWatchlist: (req, res) => {
+  const userId = req.params.userId;
+  const movieId = req.params.movieId;
+  Watchlist.updateWatchlist(userId, movieId, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+},
+```
+
+**Penjelasan:**
+- Fungsi ini memperbarui data dalam watchlist berdasarkan userId dan movieId.
+- Penerapannya membutuhkan model Watchlist untuk melakukan operasi database.
+
+
+#### 4. `removeMovieFromWatchlist`
+Menghapus film dari watchlist pengguna.
+
+- **Input**: `userId`, `movieId` (params).
+- **Output**: Pesan keberhasilan atau error.
+- **Query**: `DELETE FROM watchlist WHERE user_id = ? AND movie_id = ?`.
+
+```javascript
+removeMovieFromWatchlist: (req, res) => {
+  const userId = req.params.userId;
+  const movieId = req.params.movieId;
+  Watchlist.removeMovieFromWatchlist(userId, movieId, (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: "Movie removed from watchlist successfully!" });
+  });
+},
+```
+
+
+---
 
 
 
