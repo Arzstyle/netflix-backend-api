@@ -1580,6 +1580,5 @@ Masih banyak fitur menarik yang dapat ditambahkan untuk meningkatkan pengalaman 
 - 📊 **Analitik Pengguna**: Data seperti jumlah penonton, durasi menonton, dan tren populer.  
 - 💳 **Langganan Premium**: Menambahkan payment gateway untuk fitur eksklusif seperti streaming tanpa iklan.  
 - 📝 **Dokumentasi API yang Interaktif**: Menggunakan Swagger atau dokumentasi Postman agar pengembang mudah memahami cara kerja API.  
-- 💬 **Notifikasi Real-Time**: Menggunakan WebSocket untuk memberikan pemberitahuan langsung kepada pengguna.  
 
 ---
