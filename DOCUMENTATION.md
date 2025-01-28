@@ -14,12 +14,6 @@
 ---
 
 ## **Pendahuluan** 
-Proyek ini adalah aplikasi berbasis web yang dirancang untuk mengelola data pengguna, film, genre, dan daftar tontonan. Tujuan utamanya adalah memberikan pengalaman pengguna yang optimal melalui pengelolaan data yang terstruktur.
-
----
-
-
-## **Pendahuluan** 
 
 ### **Deskripsi Proyek**
 Netflix Backend API adalah sebuah proyek backend yang dirancang untuk mendukung platform streaming film dan serial televisi. Proyek ini memungkinkan pengelolaan data film, serial, genre, pengguna, serta menyediakan fitur autentikasi, otorisasi, dan pengelolaan akun pengguna. Backend ini dibangun menggunakan teknologi modern untuk memastikan performa, skalabilitas, dan keamanan yang optimal.
@@ -48,10 +42,10 @@ Postman: Untuk pengujian dan dokumentasi endpoint API selama proses pengembangan
 
 ---
 
-## **DATABASE**
+## **Database**
 Struktur database ini dirancang untuk memastikan data yang terorganisir, relasi yang jelas antar entitas, serta menjaga integritas data dengan menggunakan kunci utama dan kunci asing. Hal ini memungkinkan implementasi fitur aplikasi Netflix Clone seperti pengelolaan pengguna, daftar tontonan, dan data film secara efisien.
 
-## **STURKTUR TABLE**
+## **Struktur Table**
 1. **Table `users`**:
   - Tabel Users menyimpan data pengguna yang terdaftar di aplikasi.
     Kolom Penjelasan:
